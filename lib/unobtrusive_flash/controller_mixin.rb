@@ -4,6 +4,8 @@ module UnobtrusiveFlash
   module ControllerMixin
     protected
 
+    FLASH_MESSAGE_KEYS = ["notice", "error", "alert", "warning"].freeze
+
     def prepare_unobtrusive_flash
       if flash.any?
         cookie_flash = []
@@ -12,9 +14,9 @@ module UnobtrusiveFlash
           cookie_flash=[] unless cookie_flash.is_a? Array
         end
 
-        cookie_flash += UnobtrusiveFlash::ControllerMixin.sanitize_flash(flash)
+        cookie_flash += UnobtrusiveFlash::ControllerMixin.sanitize_flash(flash.to_hash.slice(*FLASH_MESSAGE_KEYS))
         cookies[:flash] = {:value => cookie_flash.to_json, :domain => unobtrusive_flash_domain}
-        flash.discard
+        FLASH_MESSAGE_KEYS.each { |k| flash.discard(k) }
       end
     end
 
